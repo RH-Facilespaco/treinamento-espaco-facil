@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de Atendimento — Espaço Fácil (Endereço Fiscal)</title>
+<style>
+  :root {
+    color-scheme: light;
+    --brand-green-dark: #002E24;
+    --brand-green-light: #007D59;
+    --brand-amber: #F9B112;
+    --brand-grey: #575656;
+    --bg: var(--brand-green-dark);
+    --panel: #0f3c2f;
+    --card-bg: #ffffff;
+    --text: #1c1f1e;
+    --text-muted: #575656;
+    --text-on-dark: rgba(255,255,255,0.88);
+    --text-on-dark-muted: rgba(255,255,255,0.65);
+    --border: #c7d1cb;
+    --border-on-dark: rgba(255,255,255,0.15);
+    --correct: #007D59;
+    --correct-bg: #e5f3ed;
+    --wrong: #b3261e;
+    --wrong-bg: #fceceb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .app { max-width: 760px; margin: 0 auto; padding: 24px 20px 60px; }
+  .back-link { display:inline-block; margin-bottom: 12px; font-size: 13px; color: var(--brand-amber); text-decoration: none; font-weight:600; }
+  .back-link:hover { text-decoration: underline; }
+  header.top {
+    background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green-light) 100%);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 22px 24px 20px;
+    margin-bottom: 20px;
+    border-bottom: 3px solid var(--brand-amber);
+  }
+  .brand-tag {
+    display:inline-block;
+    background: var(--brand-amber);
+    color: var(--brand-green-dark);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  header.top h1 { margin: 0 0 4px; font-size: 20px; }
+  header.top p { margin: 0; color: #cfe3d8; font-size: 13.5px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .badge-produto { background: var(--brand-amber); color: var(--brand-green-dark); }
+  .badge-etapas { background: var(--brand-green-light); color: #fff; }
+
+  .progress-wrap { display:flex; align-items:center; gap:10px; margin: 0 0 18px; font-size: 13px; color: var(--text-on-dark-muted); }
+  .progress-track { flex:1; height: 8px; background: rgba(255,255,255,0.15); border-radius: 999px; overflow:hidden; }
+  .progress-fill { height:100%; background: var(--brand-amber); border-radius: 999px; transition: width .25s ease; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand-green-dark);
+    border-radius: 14px;
+    padding: 22px 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,46,36,0.12), 0 1px 2px rgba(0,46,36,0.08);
+  }
+  .card h2 { font-size: 16px; margin: 10px 0 14px; }
+  .context { font-size: 15px; line-height: 1.55; }
+
+  .options { display:flex; flex-direction:column; gap:9px; margin-top: 16px; }
+  .opt-btn {
+    text-align:left;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--brand-green-dark); }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); font-weight:600; }
+  .opt-btn.wrong { background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); font-weight:600; }
+  .opt-btn.dim { opacity: .55; }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    font-size: 14.5px;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+  input[type="text"]:focus { outline: 2px solid var(--brand-green-dark); border-color: transparent; }
+  label.field-label { font-size: 13px; color: var(--text-muted); font-weight:600; }
+
+  .btn {
+    display:inline-block;
+    padding: 10px 18px;
+    border-radius: 9px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--brand-green-dark); color:#fff; }
+  .btn-amber { background: var(--brand-amber); color: var(--brand-green-dark); }
+  .btn-amber:disabled { background:#f7dfa1; color:#8a8a8a; cursor:not-allowed; }
+  .btn-outline { background: transparent; color: var(--brand-green-dark); border: 1.5px solid var(--brand-green-dark); }
+  .btn-row { margin-top: 14px; display:flex; gap:10px; flex-wrap:wrap; }
+
+  .rubric-box {
+    margin-top: 16px;
+    background: #f2f6f4;
+    border: 1px solid #dbe6e0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  .rubric-box strong { display:block; margin-bottom: 6px; color: var(--brand-green-dark); font-size: 13px; text-transform:uppercase; letter-spacing:.03em; }
+
+  .start-card ul { margin: 10px 0 0; padding-left: 20px; font-size: 14px; color: var(--text-muted); }
+  .start-card li { margin-bottom: 6px; }
+
+  .summary-score { font-size: 34px; font-weight:700; color: var(--brand-green-dark); margin: 6px 0 2px; }
+  .summary-sub { color: var(--text-muted); font-size: 13.5px; margin-bottom: 18px; }
+
+  table.review { width:100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+  table.review th, table.review td { text-align:left; padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.review th { color: var(--text-muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em; }
+  .status-pill { display:inline-block; font-size:12px; font-weight:600; padding:2px 9px; border-radius:999px; }
+  .status-correct { background: var(--correct-bg); color: var(--correct); }
+  .status-wrong { background: var(--wrong-bg); color: var(--wrong); }
+
+  .send-box {
+    margin-top: 18px;
+    background: #faf6ee;
+    border: 1px dashed var(--brand-amber);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .send-box p { margin: 0 0 10px; font-size: 13.5px; color: var(--text-muted); }
+
+  .history { margin-top: 22px; }
+  .history h3 { font-size: 13px; text-transform:uppercase; letter-spacing:.03em; color: var(--text-on-dark-muted); margin-bottom: 10px; }
+  .history-item { display:flex; justify-content:space-between; font-size: 13.5px; padding: 8px 0; color: var(--text-on-dark); border-bottom: 1px dashed var(--border-on-dark); }
+  .history-empty { font-size: 13.5px; color: var(--text-on-dark-muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <a class="back-link" href="index.html">← Voltar para o menu de treinamentos</a>
+  <header class="top">
+    <span class="brand-tag">Espaço Fácil</span>
+    <h1>Simulador de Atendimento — Endereço Fiscal</h1>
+    <p>Foco: escolher a modalidade certa (com ou sem Inscrição Estadual) e conhecer as regras do que está e não está incluso. 20 casos misturados, múltipla escolha.</p>
+  </header>
+  <div id="root"></div>
+  <div class="history" id="history"></div>
+</div>
+
+<script>
+const TEMA = 'Endereço Fiscal';
+
+const SCENARIOS = [
+  // ---------- MODALIDADE (com IE x sem IE) ----------
+  { id: 1, category: 'Produto', type: 'mc',
+    context: "Cliente online: “Tenho uma loja de roupas no Instagram, emito nota fiscal de produto e preciso de CNPJ com endereço comercial.”",
+    question: "Qual modalidade você indicaria?",
+    options: ["Endereço fiscal sem IE", "Endereço fiscal com IE", "Armazenamento comum", "Serviço LOG"],
+    correct: 1,
+    explanation: "Comércio/e-commerce que emite nota fiscal de produto precisa de Inscrição Estadual — a modalidade com IE exige box privativo e inclui a documentação de abertura." },
+
+  { id: 2, category: 'Produto', type: 'mc',
+    context: "Cliente por telefone: “Sou contador, presto serviço, trabalho de casa, só preciso regularizar o CNPJ com um endereço comercial.”",
+    question: "Qual modalidade você indicaria?",
+    options: ["Endereço fiscal com IE", "Endereço fiscal sem IE", "Armazenamento 2m²", "Horário Estendido"],
+    correct: 1,
+    explanation: "Prestador de serviço não exige Inscrição Estadual — a modalidade sem IE não exige espaço físico." },
+
+  { id: 3, category: 'Produto', type: 'mc',
+    context: "Cliente presencial: “Vou abrir um e-commerce de cosméticos, preciso emitir nota fiscal de produto.”",
+    question: "Qual modalidade você indicaria?",
+    options: ["Endereço fiscal com IE", "Endereço fiscal sem IE", "Só armazenamento", "Locker"],
+    correct: 0,
+    explanation: "Emissão de nota fiscal de produto exige Inscrição Estadual — modalidade com IE." },
+
+  { id: 4, category: 'Produto', type: 'mc',
+    context: "Cliente online: “Sou designer freelancer, presto serviço, não tenho estoque físico nenhum.”",
+    question: "Qual modalidade você indicaria?",
+    options: ["Endereço fiscal com IE", "Endereço fiscal sem IE", "Armazenamento 3m²", "Serviço LOG"],
+    correct: 1,
+    explanation: "Prestador de serviço sem estoque não precisa de Inscrição Estadual — modalidade sem IE." },
+
+  { id: 5, category: 'Produto', type: 'mc',
+    context: "Cliente presencial: “Tenho uma distribuidora pequena, preciso de espaço pra guardar produtos e emitir nota fiscal.”",
+    question: "Qual modalidade você indicaria?",
+    options: ["Endereço fiscal sem IE", "Endereço fiscal com IE", "Só Horário Estendido", "Locker"],
+    correct: 1,
+    explanation: "Distribuição com estoque físico e emissão de nota fiscal exige Inscrição Estadual — modalidade com IE, que inclui box privativo." },
+
+  { id: 6, category: 'Produto', type: 'mc',
+    context: "Cliente por telefone: “Presto consultoria financeira, atendo os clientes só online, quero regularizar o CNPJ.”",
+    question: "Qual modalidade você indicaria?",
+    options: ["Endereço fiscal com IE", "Endereço fiscal sem IE", "Armazenamento 4m²", "Serviço LOG"],
+    correct: 1,
+    explanation: "Consultoria prestada online, sem estoque físico, não exige Inscrição Estadual — modalidade sem IE." },
+
+  { id: 7, category: 'Produto', type: 'mc',
+    context: "Cliente (prestador de serviço, sem estoque) pergunta: “Eu preciso de um espaço físico exclusivo pra guardar minhas coisas?”",
+    question: "O que você responde?",
+    options: ["Sim, todo endereço fiscal exige box exclusivo", "Não, a modalidade sem Inscrição Estadual não exige espaço físico", "Só se ele pagar um adicional", "Depende do tamanho da empresa"],
+    correct: 1,
+    explanation: "A modalidade sem IE não exige espaço físico — é voltada a quem só precisa regularizar o CNPJ com um endereço comercial." },
+
+  { id: 8, category: 'Produto', type: 'mc',
+    context: "Cliente (comércio com estoque, precisa de IE) pergunta: “Isso vem com um box exclusivo pra mim?”",
+    question: "O que você responde?",
+    options: ["Não, nenhuma modalidade inclui box", "Sim, a modalidade com Inscrição Estadual inclui box privativo", "Só se for um plano superior", "Só para clientes antigos"],
+    correct: 1,
+    explanation: "A modalidade com IE exige espaço físico privativo e inclui um box exclusivo para o cliente." },
+
+  { id: 9, category: 'Produto', type: 'mc',
+    context: "Cliente que vai contratar a modalidade com Inscrição Estadual pergunta: “Qual o tamanho mínimo de box para isso?”",
+    question: "O que você responde?",
+    options: ["Não tem tamanho mínimo, qualquer box serve", "6m² é a referência mínima quando precisa de espaço exclusivo", "Só Locker é aceito", "Precisa ser no mínimo 9m²"],
+    correct: 1,
+    explanation: "6m² é usado como referência mínima para Endereço Fiscal com Inscrição Estadual, quando o cliente precisa de espaço exclusivo." },
+
+  { id: 10, category: 'Produto', type: 'mc',
+    context: "Cliente em dúvida: “Ainda não sei se vou ter estoque físico. Estou revendendo roupas, mas pode ser que eu não precise guardar nada aqui.”",
+    question: "O que você faz primeiro, antes de indicar uma modalidade?",
+    options: ["Já oferece direto a modalidade com IE, por segurança", "Pergunta se a atividade dele vai exigir Inscrição Estadual antes de decidir", "Oferece sem IE porque é mais barato", "Diz que só atende quando ele tiver certeza"],
+    correct: 1,
+    explanation: "Antes de indicar a modalidade, é preciso entender a necessidade real — perguntar sobre o tipo de atividade e se ela exige Inscrição Estadual, em vez de supor ou empurrar a opção mais cara ou mais barata." },
+
+  // ---------- REGRAS: O QUE INCLUI, ETAPAS E CRM ----------
+  { id: 11, category: 'Etapas', type: 'mc',
+    context: "Cliente pergunta: “Vocês me ajudam com a documentação de abertura da empresa?”",
+    question: "O que você responde?",
+    options: ["Não, isso é só com um contador", "Sim, inclui documentação de abertura/transferência (IPTU, CVCB, Habite-se, Alvará de funcionamento)", "Só na modalidade sem IE", "Só depois de 3 meses de contrato"],
+    correct: 1,
+    explanation: "Ambas as modalidades incluem a documentação de abertura/transferência da empresa: IPTU, CVCB, Habite-se e Alvará de funcionamento." },
+
+  { id: 12, category: 'Etapas', type: 'mc',
+    context: "Cliente pergunta: “Vocês recebem minhas correspondências, tipo boleto e carta do banco?”",
+    question: "O que você responde?",
+    options: ["Não recebemos nenhuma correspondência", "Sim, correspondência simples e registrada", "Só correspondência registrada", "Só se for da Receita Federal"],
+    correct: 1,
+    explanation: "O recebimento de correspondência simples e registrada está incluso em ambas as modalidades de Endereço Fiscal." },
+
+  { id: 13, category: 'Etapas', type: 'mc',
+    context: "Cliente pergunta: “Se eu receber uma intimação ou notificação judicial, vocês recebem e me avisam?”",
+    question: "O que você responde?",
+    options: ["Sim, está incluso", "Não, notificações judiciais e extrajudiciais não estão inclusas", "Só na modalidade com IE", "Só se o cliente pedir um adicional"],
+    correct: 1,
+    explanation: "Notificações judiciais e extrajudiciais não estão inclusas em nenhuma modalidade — isso precisa ficar claro para o cliente." },
+
+  { id: 14, category: 'Etapas', type: 'mc',
+    context: "Cliente pergunta: “As licenças específicas da minha atividade, tipo vigilância sanitária, vocês emitem?”",
+    question: "O que você responde?",
+    options: ["Sim, emitimos qualquer licença", "Não, documentações específicas da atividade são de responsabilidade do cliente", "Só para empresas de grande porte", "Só na modalidade sem IE"],
+    correct: 1,
+    explanation: "Documentações específicas da atividade do cliente (como licenças setoriais) são de responsabilidade dele, não estão inclusas no serviço." },
+
+  { id: 15, category: 'Etapas', type: 'mc',
+    context: "Canal presencial: cliente chega perguntando sobre endereço fiscal, sem dizer o motivo.",
+    question: "Qual é a primeira coisa a identificar?",
+    options: ["Direto o preço de cada modalidade", "Se ele precisa de Inscrição Estadual ou não — motivo da necessidade, tipo de atividade", "Se ele já é cliente de armazenamento", "O tamanho do box que ele prefere"],
+    correct: 1,
+    explanation: "Antes de indicar qualquer modalidade, é preciso identificar o motivo da necessidade (abertura, transferência) e se a atividade exige Inscrição Estadual." },
+
+  { id: 16, category: 'Etapas', type: 'mc',
+    context: "Você já identificou que o cliente precisa da modalidade com Inscrição Estadual.",
+    question: "Qual é o próximo passo no atendimento presencial?",
+    options: ["Enviar o orçamento direto, sem mostrar nada", "Mostrar o box privativo correspondente", "Perguntar se ele quer Serviço LOG", "Encerrar e pedir para ele voltar depois"],
+    correct: 1,
+    explanation: "Como a modalidade com IE inclui box privativo, o próximo passo natural no presencial é mostrar esse espaço físico ao cliente, como em qualquer apresentação de solução." },
+
+  { id: 17, category: 'Etapas', type: 'mc',
+    context: "Canal online: você já identificou que o cliente não precisa de Inscrição Estadual e explicou a modalidade sem IE.",
+    question: "O que precisa vir junto quando você enviar o orçamento?",
+    options: ["Nada além do valor", "Áudio personalizado, mencionando o nome do cliente", "Só um PDF sem contexto", "Um desconto automático"],
+    correct: 1,
+    explanation: "A regra do áudio personalizado no orçamento vale para qualquer produto, inclusive Endereço Fiscal — não é opcional." },
+
+  { id: 18, category: 'Etapas', type: 'mc',
+    context: "Canal telefone: depois de explicar a diferença entre as duas modalidades, o cliente ainda tem dúvida sobre como é o box privativo da modalidade com IE.",
+    question: "O que você faz?",
+    options: ["Insiste em descrever por telefone até ele se convencer", "Convida para uma visita presencial, para conhecer o box", "Marca a venda como perdida", "Oferece a modalidade sem IE para simplificar"],
+    correct: 1,
+    explanation: "Assim como no armazenamento, quando resta dúvida sobre o espaço físico, o caminho é convidar para a visita presencial — é o canal que mais aproxima o cliente da decisão." },
+
+  { id: 19, category: 'Etapas', type: 'mc',
+    context: "Você atendeu um cliente que perguntou sobre endereço fiscal e o preço, mas não fechou negócio nesse primeiro contato.",
+    question: "O que é obrigatório registrar no CRM?",
+    options: ["Nada, só se ele fechar depois", "Negócio e orçamento", "Só o negócio, orçamento é opcional", "Só se for cliente indicado"],
+    correct: 1,
+    explanation: "A regra é a mesma para qualquer produto: todo negócio em que o lead pergunta preço recebe obrigatoriamente um orçamento registrado no CRM." },
+
+  { id: 20, category: 'Etapas', type: 'mc',
+    context: "Cliente pergunta: “Isso é tipo um 'escritório virtual' comum de outras empresas?”",
+    question: "O que diferencia o Endereço Fiscal da Espaço Fácil?",
+    options: ["É exatamente igual, só muda o preço", "O diferencial é incluir a documentação de abertura/transferência da empresa — não é só um endereço", "Não oferecemos nada parecido com isso", "Só atende quem já tem CNPJ aberto há mais de 1 ano"],
+    correct: 1,
+    explanation: "O diferencial é justamente incluir a documentação de abertura/transferência (IPTU, CVCB, Habite-se, Alvará), além do recebimento de correspondência — não é só disponibilizar um endereço." }
+];
+
+const HISTORY_KEY = 'ef_treino_endereco_fiscal';
+const MANAGER_EMAIL = 'rh@facilespaco.com.br';
+// Cole aqui a URL de implantação (/exec) do Google Apps Script, depois de publicá-lo.
+// Enquanto estiver vazia, o envio automático fica desativado e só o botão manual de e-mail funciona.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEOKsAaV1P1QNW-iaY-4acRvm7kjT7uElSyG5eRnQ0o_GwiFd1OpvLqtxDz9JSwdeZHg/exec';
+let summarySent = false;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let order = shuffle(SCENARIOS);
+let idx = -1; // -1 = start screen
+let results = {}; // id -> {status:'correct'|'wrong', selected}
+let traineeName = '';
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveHistoryEntry(entry) {
+  const h = loadHistory();
+  h.unshift(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, 20)));
+}
+
+function computeScore() {
+  let total = order.length;
+  let sum = 0;
+  order.forEach(s => { if (results[s.id] && results[s.id].status === 'correct') sum += 1; });
+  return { sum, total };
+}
+
+function renderHistory() {
+  const h = loadHistory();
+  const el = document.getElementById('history');
+  if (!h.length) {
+    el.innerHTML = '<h3>Tentativas anteriores (neste navegador)</h3><div class="history-empty">Nenhuma tentativa registrada ainda.</div>';
+    return;
+  }
+  el.innerHTML = '<h3>Tentativas anteriores (neste navegador)</h3>' + h.map(item => `
+    <div class="history-item">
+      <span>${item.name ? item.name + ' — ' : ''}${item.date}</span>
+      <span>${item.sum} / ${item.total} (${item.percent}%)</span>
+    </div>
+  `).join('');
+}
+
+function startQuiz() {
+  const input = document.getElementById('trainee-name');
+  traineeName = input ? input.value.trim() : traineeName;
+  order = shuffle(SCENARIOS);
+  idx = 0;
+  results = {};
+  summarySent = false;
+  render();
+}
+
+function goNext() {
+  idx++;
+  render();
+}
+
+function selectOption(scenario, optionIndex) {
+  if (results[scenario.id]) return;
+  const correct = optionIndex === scenario.correct;
+  results[scenario.id] = { status: correct ? 'correct' : 'wrong', selected: optionIndex };
+  render();
+}
+
+function renderStart() {
+  return `
+    <div class="card start-card">
+      <span class="badge badge-produto">Prévia</span>
+      <h2>Antes de começar</h2>
+      <p class="context">${SCENARIOS.length} casos misturados, todos de múltipla escolha: metade sobre qual modalidade de Endereço Fiscal indicar (com ou sem Inscrição Estadual), metade sobre o que está incluso/não incluso e a etapa certa do atendimento. A ordem muda a cada tentativa.</p>
+      <ul>
+        <li>Escolha a opção que você daria de verdade nesse atendimento.</li>
+        <li>A correção é imediata, com a explicação de por que aquela é a resposta certa.</li>
+        <li>No final você vê a pontuação, uma tabela de revisão e pode enviar o resultado por e-mail.</li>
+      </ul>
+      <label class="field-label" for="trainee-name">Seu nome (para identificar o resultado)</label>
+      <input type="text" id="trainee-name" placeholder="Digite seu nome" value="${traineeName}">
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="startQuiz()">Começar</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderQuestion(scenario) {
+  const res = results[scenario.id];
+  const badgeClass = scenario.category === 'Produto' ? 'badge-produto' : 'badge-etapas';
+  const answered = !!res;
+
+  let body = `<div class="options">` + scenario.options.map((opt, i) => {
+    let cls = 'opt-btn';
+    if (answered) {
+      if (i === scenario.correct) cls += ' correct';
+      else if (i === res.selected) cls += ' wrong';
+      else cls += ' dim';
+    }
+    return `<button class="${cls}" ${answered ? 'disabled' : ''} onclick="selectOption(SCENARIOS.find(s=>s.id===${scenario.id}), ${i})">${opt}</button>`;
+  }).join('') + `</div>`;
+
+  if (answered) {
+    body += `<div class="rubric-box"><strong>Por quê</strong>${scenario.explanation}</div>`;
+  }
+
+  const isLast = idx === order.length - 1;
+
+  return `
+    <div class="card">
+      <span class="badge ${badgeClass}">${scenario.category === 'Produto' ? 'Modalidade' : 'Regras'}</span>
+      <p class="context">${scenario.context}</p>
+      <h2>${scenario.question}</h2>
+      ${body}
+      <div class="btn-row">
+        <button class="btn btn-amber" ${answered ? '' : 'disabled'} onclick="${isLast ? 'idx++;render()' : 'goNext()'}">${isLast ? 'Ver resultado' : 'Próximo caso'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildEmailBody(sum, total, percent) {
+  const lines = [];
+  lines.push('Resultado do Simulador de Atendimento — ' + TEMA + ' — Espaço Fácil');
+  lines.push('Funcionária: ' + (traineeName || '(nome não informado)'));
+  lines.push('Data: ' + new Date().toLocaleString('pt-BR'));
+  lines.push('Pontuação: ' + sum + ' / ' + total + ' (' + percent + '%)');
+  lines.push('');
+  lines.push('Detalhamento por caso:');
+  order.forEach((s, i) => {
+    const r = results[s.id] || { status: 'wrong' };
+    const label = r.status === 'correct' ? 'CERTO' : 'ERRADO';
+    lines.push((i + 1) + '. [' + (s.category === 'Produto' ? 'Modalidade' : 'Regras') + '] ' + s.question + ' -> ' + label);
+  });
+  return lines.join('\n');
+}
+
+function sendResultAuto(sum, total, percent) {
+  if (!APPS_SCRIPT_URL) return; // não configurado ainda — só o botão manual funciona
+  const details = buildEmailBody(sum, total, percent);
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ tema: TEMA, name: traineeName, score: sum, total: total, percent: percent, details: details })
+  }).catch(function () { /* falha silenciosa — botão manual continua disponível */ });
+}
+
+function renderSummary() {
+  const { sum, total } = computeScore();
+  const percent = total ? Math.round((sum / total) * 100) : 0;
+  if (!summarySent) {
+    saveHistoryEntry({ name: traineeName, date: new Date().toLocaleString('pt-BR'), sum, total, percent });
+    sendResultAuto(sum, total, percent);
+    summarySent = true;
+  }
+
+  const rows = order.map(s => {
+    const r = results[s.id] || { status: 'wrong' };
+    const statusClass = 'status-' + r.status;
+    const label = r.status === 'correct' ? 'Certo' : 'Errado';
+    return `<tr>
+      <td><span class="badge ${s.category==='Produto'?'badge-produto':'badge-etapas'}">${s.category === 'Produto' ? 'Modalidade' : 'Regras'}</span></td>
+      <td>${s.question}</td>
+      <td><span class="status-pill ${statusClass}">${label}</span></td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="card summary-card">
+      <h2>Resultado da tentativa</h2>
+      <div class="summary-score">${sum} / ${total}</div>
+      <div class="summary-sub">${percent}% de aproveitamento ${traineeName ? '— ' + traineeName : ''}</div>
+      <table class="review">
+        <thead><tr><th>Tipo</th><th>Caso</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="send-box">
+        <p>${APPS_SCRIPT_URL ? 'O resultado já foi enviado automaticamente para a liderança.' : 'Envio automático ainda não configurado neste link — fale com quem publicou o simulador.'}</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="startQuiz()">Tentar de novo (ordem embaralhada)</button>
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const root = document.getElementById('root');
+  const progressWrap = idx >= 0 && idx < order.length ? `
+    <div class="progress-wrap">
+      <span>Caso ${idx + 1} de ${order.length}</span>
+      <div class="progress-track"><div class="progress-fill" style="width:${((idx) / order.length) * 100}%"></div></div>
+    </div>` : '';
+
+  let content = '';
+  if (idx === -1) content = renderStart();
+  else if (idx < order.length) content = renderQuestion(order[idx]);
+  else content = renderSummary();
+
+  root.innerHTML = progressWrap + content;
+  renderHistory();
+}
+
+render();
+</script>
+</body>
+</html>

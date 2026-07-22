@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integração aos Processos — Espaço Fácil</title>
+<style>
+  :root {
+    color-scheme: light;
+    --brand-green-dark: #002E24;
+    --brand-green-light: #007D59;
+    --brand-amber: #F9B112;
+    --brand-grey: #575656;
+    --bg: var(--brand-green-dark);
+    --card-bg: #ffffff;
+    --text: #1c1f1e;
+    --text-muted: #575656;
+    --text-on-dark: rgba(255,255,255,0.88);
+    --text-on-dark-muted: rgba(255,255,255,0.65);
+    --border: #c7d1cb;
+    --border-on-dark: rgba(255,255,255,0.2);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .app { max-width: 760px; margin: 0 auto; padding: 24px 20px 60px; }
+  header.top {
+    background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green-light) 100%);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 22px 24px 20px;
+    margin-bottom: 24px;
+    border-bottom: 3px solid var(--brand-amber);
+  }
+  .brand-tag {
+    display:inline-block;
+    background: var(--brand-amber);
+    color: var(--brand-green-dark);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  header.top h1 { margin: 0 0 4px; font-size: 20px; }
+  header.top p { margin: 0; color: #cfe3d8; font-size: 13.5px; }
+
+  h2.section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-on-dark-muted); margin: 0 0 12px; }
+
+  .card-link {
+    display: block;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand-green-dark);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 6px rgba(0,46,36,0.12), 0 1px 2px rgba(0,46,36,0.08);
+    transition: transform .12s ease;
+  }
+  .card-link:hover { transform: translateY(-2px); }
+  .card-link h3 { margin: 0 0 6px; font-size: 16px; color: var(--brand-green-dark); }
+  .card-link p { margin: 0 0 10px; font-size: 14px; color: var(--text-muted); }
+  .card-meta { display:flex; gap: 8px; flex-wrap: wrap; }
+  .tag { display:inline-block; font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--brand-amber); color: var(--brand-green-dark); }
+  .tag-count { background: #e5f3ed; color: var(--brand-green-light); }
+
+  .card-soon {
+    background: transparent;
+    border: 1.5px dashed var(--border-on-dark);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    color: var(--text-on-dark-muted);
+  }
+  .card-soon h3 { margin: 0 0 6px; font-size: 15px; color: var(--text-on-dark-muted); }
+  .card-soon p { margin: 0; font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <span class="brand-tag">Espaço Fácil</span>
+    <h1>Integração aos Processos</h1>
+    <p>Escolha um tema para treinar. Pode repetir quantas vezes quiser — a ordem das perguntas muda a cada tentativa.</p>
+  </header>
+
+  <h2 class="section-title">Temas disponíveis</h2>
+
+  <a class="card-link" href="produto-e-etapas.html">
+    <h3>Produto e Etapas do Atendimento</h3>
+    <p>Escolher o produto/tamanho ideal de armazenamento e reconhecer a etapa certa do atendimento (identificação, necessidade, solução, orçamento, dúvidas, próximo passo).</p>
+    <div class="card-meta">
+      <span class="tag">Armazenamento</span>
+      <span class="tag tag-count">20 casos</span>
+    </div>
+  </a>
+
+  <a class="card-link" href="endereco-fiscal.html">
+    <h3>Endereço Fiscal</h3>
+    <p>Escolher a modalidade certa (com ou sem Inscrição Estadual), saber o que está e não está incluso, e conduzir esse atendimento nos diferentes canais.</p>
+    <div class="card-meta">
+      <span class="tag">Endereço Fiscal</span>
+      <span class="tag tag-count">20 casos</span>
+    </div>
+  </a>
+
+  <h2 class="section-title" style="margin-top: 24px;">Em breve</h2>
+  <div class="card-soon">
+    <h3>Novos temas</h3>
+    <p>Conforme novos treinamentos forem criados, eles aparecem aqui.</p>
+  </div>
+</div>
+</body>
+</html>
